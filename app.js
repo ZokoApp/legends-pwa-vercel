@@ -20,6 +20,7 @@ const inputRut = document.getElementById("rut");
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
 function setStatus(text, color = "#9ca3af") {
+  if (!statusText) return;
   statusText.textContent = text;
   statusText.style.color = color;
 }
@@ -36,7 +37,7 @@ btnClear.onclick = () => {
   setStatus("Listo", "#22c55e");
   inputAddress.value = "";
   inputComuna.value = "";
-  if (inputRut) inputRut.value = "";
+  inputRut.value = "";
 };
 
 // ===============================
@@ -50,10 +51,9 @@ btnRun.onclick = async () => {
   const mode = selMode.value;
   const direccion = inputAddress.value.trim();
   const comuna = inputComuna.value.trim();
-  const rut = inputRut ? inputRut.value.trim() : "";
+  const rut = inputRut.value.trim();
 
   try {
-    let startUrl = "";
     let pollUrl = "";
 
     // ==========================
@@ -71,11 +71,8 @@ btnRun.onclick = async () => {
         body: JSON.stringify({ direccion, comuna, company })
       });
 
-      if (!res.ok) throw new Error("Error iniciando factibilidad");
       const data = await res.json();
-
-      startUrl = `${API}/factibilidad/${data.jobId}`;
-      pollUrl = startUrl;
+      pollUrl = `${API}/factibilidad/${data.jobId}`;
     }
 
     // ==========================
@@ -93,9 +90,7 @@ btnRun.onclick = async () => {
         body: JSON.stringify({ rut, company })
       });
 
-      if (!res.ok) throw new Error("Error iniciando estado");
       const data = await res.json();
-
       pollUrl = `${API}/estado-rut/${data.jobId}`;
     }
 
@@ -106,11 +101,9 @@ btnRun.onclick = async () => {
       await sleep(2000);
 
       const poll = await fetch(pollUrl);
-      if (!poll.ok) throw new Error("Error consultando estado");
-
       const result = await poll.json();
 
-      if (result.status === "running" || result.status === "queued") {
+      if (result.status === "running") {
         setStatus("Procesando…", "#eab308");
         continue;
       }
@@ -124,30 +117,20 @@ btnRun.onclick = async () => {
       if (result.status === "done") {
         setStatus("Finalizado", "#22c55e");
 
-        // TEXTO
         if (result.resultado) {
           const pre = document.createElement("pre");
           pre.textContent = result.resultado;
-          pre.style.whiteSpace = "pre-wrap";
           output.appendChild(pre);
         }
 
-        // CAPTURA
         if (result.capturaUrl) {
           const img = document.createElement("img");
           img.src = API + result.capturaUrl + "?t=" + Date.now();
           img.style.width = "100%";
           img.style.borderRadius = "12px";
           img.style.marginTop = "12px";
-
-          img.onclick = () => {
-            const w = window.open();
-            w.document.write(`<img src="${img.src}" style="width:100%">`);
-          };
-
           output.appendChild(img);
         }
-
         break;
       }
     }
