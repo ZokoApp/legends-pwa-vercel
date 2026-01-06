@@ -3,7 +3,7 @@ const btnClear = document.getElementById("btnClear");
 const statusText = document.getElementById("statusText");
 const output = document.getElementById("output");
 
-const API = "http://192.168.100.69:3000"; // IP DE TU PC
+const API = "https://subpreputial-hypersuggestible-leonie.ngrok-free.dev"; // IP DE TU PC
 
 function sleep(ms) {
   return new Promise(res => setTimeout(res, ms));
