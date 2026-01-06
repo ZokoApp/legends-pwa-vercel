@@ -8,34 +8,46 @@
 </head>
 <body>
 
-  <div class="app">
+  <div class="container">
     <h1>Legends Bot</h1>
 
+    <!-- COMPAÑÍA -->
     <label>Compañía</label>
-<select id="company">
-  <option value="VTR">VTR</option>
-  <option value="CLARO">CLARO</option>
-</select>
+    <select id="company">
+      <option value="VTR">VTR</option>
+      <option value="CLARO">CLARO</option>
+    </select>
 
-<label>Modo</label>
-<select id="mode">
-  <option value="factibilidad">Factibilidad</option>
-  <option value="estado">Estado</option>
-</select>
+    <!-- MODO -->
+    <label>Modo</label>
+    <select id="mode">
+      <option value="factibilidad">Factibilidad</option>
+      <option value="estado">Estado</option>
+    </select>
 
+    <!-- DIRECCIÓN -->
     <label>Dirección</label>
-    <input id="address" placeholder="Ej: Pje Río Claro 547" />
+    <input id="address" type="text" placeholder="Ej: Pje Río Claro 547"/>
 
+    <!-- COMUNA -->
     <label>Comuna</label>
-    <input id="comuna" placeholder="Ej: San Clemente" />
+    <input id="comuna" type="text" placeholder="Ej: San Clemente"/>
 
-    <div class="buttons">
+    <!-- RUT -->
+    <label>RUT</label>
+    <input id="rut" type="text" placeholder="Ej: 12345678-9"/>
+
+    <!-- BOTONES -->
+    <div class="actions">
       <button id="btnRun">Ejecutar</button>
-      <button id="btnClear" class="secondary">Limpiar</button>
+      <button id="btnClear">Limpiar</button>
     </div>
 
-    <div id="status">Listo</div>
-    <pre id="output"></pre>
+    <!-- ESTADO (🔥 ESTE ERA EL QUE FALTABA) -->
+    <div id="statusText" class="status">Listo</div>
+
+    <!-- RESULTADO -->
+    <div id="output"></div>
   </div>
 
   <script src="app.js"></script>
