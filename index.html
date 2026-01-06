@@ -4,32 +4,40 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Legends Bot</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <div class="card">
-    <h2>Legends Bot</h2>
+  <div class="app">
+    <h1>Legends Bot</h1>
 
-    <select id="company">
-      <option value="VTR">VTR</option>
-    </select>
+    <label>Compañía</label>
+<select id="company">
+  <option value="VTR">VTR</option>
+  <option value="CLARO">CLARO</option>
+</select>
 
-    <select id="mode">
-      <option value="factibilidad">Factibilidad</option>
-    </select>
+<label>Modo</label>
+<select id="mode">
+  <option value="factibilidad">Factibilidad</option>
+  <option value="estado">Estado</option>
+</select>
 
-    <input id="address" placeholder="Dirección">
-    <input id="comuna" placeholder="Comuna">
+    <label>Dirección</label>
+    <input id="address" placeholder="Ej: Pje Río Claro 547" />
 
-    <button id="btnRun">Ejecutar</button>
-    <button id="btnClear">Limpiar</button>
+    <label>Comuna</label>
+    <input id="comuna" placeholder="Ej: San Clemente" />
 
-    <div id="statusText">Listo</div>
+    <div class="buttons">
+      <button id="btnRun">Ejecutar</button>
+      <button id="btnClear" class="secondary">Limpiar</button>
+    </div>
+
+    <div id="status">Listo</div>
     <pre id="output"></pre>
   </div>
 
   <script src="app.js"></script>
 </body>
-
 </html>
