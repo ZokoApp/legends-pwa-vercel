@@ -1,125 +1,93 @@
-// ===============================
-// CONFIG
-// ===============================
-const API = "https://subpreputial-hypersuggestible-leonie.ngrok-free.dev";
-
 const btnRun = document.getElementById("btnRun");
 const btnClear = document.getElementById("btnClear");
-const output = document.getElementById("output");
 const statusText = document.getElementById("statusText");
+const output = document.getElementById("output");
 
-const selCompany = document.getElementById("company");
-const selMode = document.getElementById("mode");
-const inputAddress = document.getElementById("address");
-const inputComuna = document.getElementById("comuna");
-const inputRut = document.getElementById("rut");
+const API = "https://subpreputial-hypersuggestible-leonie.ngrok-free.dev";
 
-// ===============================
-// UTILS
-// ===============================
-const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+function sleep(ms) {
+  return new Promise(res => setTimeout(res, ms));
+}
 
-function setStatus(text, color = "#9ca3af") {
-  if (!statusText) return;
+function setStatus(text) {
   statusText.textContent = text;
-  statusText.style.color = color;
 }
 
-function clearOutput() {
-  output.innerHTML = "";
-}
+btnClear.addEventListener("click", () => {
+  output.textContent = "";
+  setStatus("🟢 Listo — conectado a la API");
+});
 
-// ===============================
-// LIMPIAR
-// ===============================
-btnClear.onclick = () => {
-  clearOutput();
-  setStatus("Listo", "#22c55e");
-  inputAddress.value = "";
-  inputComuna.value = "";
-  inputRut.value = "";
-};
+btnRun.addEventListener("click", async () => {
+  const company = document.getElementById("company").value;
+  const mode = document.getElementById("mode").value;
+  const direccion = document.getElementById("address").value.trim();
+  const comuna = document.getElementById("comuna").value.trim();
+  const rut = document.getElementById("rut")?.value.trim();
 
-// ===============================
-// EJECUTAR
-// ===============================
-btnRun.onclick = async () => {
-  clearOutput();
-  setStatus("Enviando solicitud…", "#eab308");
-
-  const company = selCompany.value;
-  const mode = selMode.value;
-  const direccion = inputAddress.value.trim();
-  const comuna = inputComuna.value.trim();
-  const rut = inputRut.value.trim();
+  output.textContent = "";
+  setStatus("⏳ Enviando consulta…");
 
   try {
-    let pollUrl = "";
+    let pollUrl = null;
 
-    // ==========================
-    // FACTIBILIDAD
-    // ==========================
     if (mode === "factibilidad") {
       if (!direccion || !comuna) {
-        setStatus("Faltan datos", "#ef4444");
+        setStatus("🔴 Falta dirección o comuna");
         return;
       }
 
-      const res = await fetch(`${API}/factibilidad`, {
+      const start = await fetch(`${API}/factibilidad`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true"
+        },
         body: JSON.stringify({ direccion, comuna, company })
       });
 
-      const data = await res.json();
+      if (!start.ok) {
+        throw new Error("No se pudo iniciar la factibilidad");
+      }
+
+      const data = await start.json();
       pollUrl = `${API}/factibilidad/${data.jobId}`;
     }
 
-    // ==========================
-    // ESTADO RUT
-    // ==========================
-    if (mode === "estado") {
-      if (!rut) {
-        setStatus("Falta RUT", "#ef4444");
-        return;
-      }
+    setStatus("🟡 Ejecutando en Citrix…");
 
-      const res = await fetch(`${API}/estado-rut`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rut, company })
-      });
-
-      const data = await res.json();
-      pollUrl = `${API}/estado-rut/${data.jobId}`;
-    }
-
-    // ==========================
-    // POLLING
-    // ==========================
     while (true) {
       await sleep(2000);
 
-      const poll = await fetch(pollUrl);
+      const poll = await fetch(pollUrl, {
+        headers: {
+          "ngrok-skip-browser-warning": "true"
+        }
+      });
+
+      if (!poll.ok) {
+        throw new Error("Error consultando estado");
+      }
+
       const result = await poll.json();
 
-      if (result.status === "running") {
-        setStatus("Procesando…", "#eab308");
+      if (result.status === "running" || result.status === "queued") {
         continue;
       }
 
       if (result.status === "error") {
-        setStatus("Error", "#ef4444");
+        setStatus("🔴 Error");
         output.textContent = result.error || "Error desconocido";
-        break;
+        return;
       }
 
       if (result.status === "done") {
-        setStatus("Finalizado", "#22c55e");
+        setStatus("🟢 Finalizado");
 
         if (result.resultado) {
           const pre = document.createElement("pre");
           pre.textContent = result.resultado;
+          pre.style.whiteSpace = "pre-wrap";
           output.appendChild(pre);
         }
 
@@ -127,16 +95,19 @@ btnRun.onclick = async () => {
           const img = document.createElement("img");
           img.src = API + result.capturaUrl + "?t=" + Date.now();
           img.style.width = "100%";
-          img.style.borderRadius = "12px";
           img.style.marginTop = "12px";
+          img.style.borderRadius = "12px";
+          img.style.cursor = "zoom-in";
+          img.onclick = () => window.open(img.src, "_blank");
           output.appendChild(img);
         }
-        break;
+
+        return;
       }
     }
 
-  } catch (err) {
-    setStatus("Error", "#ef4444");
-    output.textContent = err.message;
+  } catch (e) {
+    setStatus("🔴 Error");
+    output.textContent = e.message;
   }
-};
+});
